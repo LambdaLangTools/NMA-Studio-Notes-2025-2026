@@ -1,0 +1,84 @@
+int offsetX, offsetY;
+PImage img, bump;
+
+void setup() {
+  size(800, 800, P3D);
+  background(0);
+  smooth();
+  offsetX = width/2;
+  offsetY = height/2;
+  
+  img = loadImage("tomJones.png");
+  bump = img.copy();
+  float f = 0.5;
+  img.resize(round(img.width*f),round(img.height*f));
+  bump.resize(img.width,img.height);
+  img.loadPixels();
+  bump.loadPixels();
+  bump.filter(BLUR,4);
+}
+
+void draw() {
+  background(0);
+
+  pushMatrix();
+  translate(offsetX, offsetY*1.5);
+  camControl(0.1); // Set up your rotation;
+  if(keyPressed)grid(50, 10); // Set up your gird;
+  //LET US WORK BETWEEN THIS LINE...
+
+  pushMatrix();
+  translate(-img.width/2,0); //<----------- !!!
+  
+  for(int i=0; i<img.width; i++){
+    for(int j=0; j<img.height; j++){
+      
+      color pix = img.get(i,j);
+      color bumpY = bump.get(i,j);
+      float posY = map(brightness(bumpY),-0,255,-200,200);
+      
+      stroke(pix);
+      point(i,posY,img.height-j);
+      
+    }    
+  }
+  popMatrix();
+
+
+  
+  //... AND THIS LINE
+  popMatrix();
+}
+
+void camControl(float speed){
+ rotateX(radians(90));
+ rotateZ(radians(frameCount*speed));
+}
+
+
+void grid(int sz, int res) {
+  int len = sz*res;
+  int offset = -len/2;
+  
+  
+  stroke(255,0,0);
+  line(0,0,0,len/2.,0,0); // X axis
+  stroke(0,255,0);
+  line(0,0,0,0,len/2.,0); // Y axis
+  stroke(0,0,255);
+  line(0,0,0,0,0,len/2.); // Z axis
+  
+  stroke(255,64);
+  noFill();
+  pushMatrix();
+  translate(offset,offset);
+  for (int i=0; i<sz; i++) {
+    beginShape(QUAD_STRIP);
+    for (int j=0; j<sz+1; j++) {
+      vertex(i*res, j*res);
+      vertex((i+1)*res, (j)*res);
+    }
+    endShape();
+  }
+  popMatrix();
+}
